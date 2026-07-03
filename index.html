@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Requirements-to-User-Story Translator · BodhiProtocol</title>
+<meta name="description" content="Every requirement hides a story. Find it. Paste a stakeholder sentence, get a user story and acceptance criteria — live, in your browser.">
+<meta name="theme-color" content="#14101F">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%2314101F%22/><text x=%2250%22 y=%2266%22 font-size=%2258%22 text-anchor=%22middle%22 fill=%22%239D7BEA%22 font-family=%22Georgia,serif%22>R</text></svg>">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Requirements-to-User-Story Translator · BodhiProtocol">
+<meta property="og:description" content="Every requirement hides a story. Find it. Paste a stakeholder sentence, get a user story and acceptance criteria — live, in your browser.">
+<meta property="og:url" content="https://bodhiprotocol.github.io/requirements-translator/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Requirements-to-User-Story Translator · BodhiProtocol">
+<meta name="twitter:description" content="Every requirement hides a story. Find it. Paste a stakeholder sentence, get a user story and acceptance criteria — live, in your browser.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#14101F;
+  --panel:#201936;
+  --panel-2:#2A2145;
+  --lotus:#9D7BEA;
+  --lavender:#C9B8F5;
+  --gold:#E8B75A;
+  --mist:#EDE9F7;
+  --muted:#8B84A3;
+  --line:rgba(157,123,234,.22);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+body{
+  background:var(--ink);
+  color:var(--mist);
+  font-family:'Inter',system-ui,sans-serif;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:var(--lavender)}
+.wrap{max-width:800px;margin:0 auto;padding:0 24px}
+
+/* ---------- header ---------- */
+header{padding:26px 0 0;display:flex;justify-content:center}
+.brand{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.78rem;letter-spacing:.22em;
+  color:var(--muted);text-transform:uppercase;
+}
+.brand b{color:var(--lotus);font-weight:500}
+
+/* ---------- hero ---------- */
+.hero{padding:44px 0 12px;text-align:center}
+.hero h1{
+  font-family:'Cormorant Garamond',serif;
+  font-weight:600;font-style:italic;
+  font-size:clamp(2rem,5.6vw,3.2rem);
+  line-height:1.12;letter-spacing:.01em;
+  color:var(--mist);
+}
+.hero h1 em{font-style:italic;color:var(--lotus)}
+.hero p.sub{
+  margin:16px auto 0;max-width:520px;
+  color:var(--muted);font-size:1rem;
+}
+
+/* ---------- examples ---------- */
+.examples{
+  display:flex;flex-wrap:wrap;justify-content:center;gap:8px;
+  margin:26px 0 6px;
+}
+.example-btn{
+  background:var(--panel-2);border:1px solid var(--line);border-radius:999px;
+  padding:7px 16px;font-size:.8rem;color:var(--lavender);cursor:pointer;
+  font-family:'Inter',sans-serif;transition:background .2s ease,border-color .2s ease;
+}
+.example-btn:hover,.example-btn:focus-visible{background:#352A58;border-color:var(--lotus);outline:none}
+
+/* ---------- input card ---------- */
+.input-zone{padding:24px 0 0}
+.input-card{
+  background:var(--panel);border:1px solid var(--line);border-radius:18px;
+  padding:28px;max-width:760px;margin:0 auto;
+}
+.input-card textarea{
+  width:100%;min-height:110px;resize:vertical;
+  background:var(--panel-2);border:1px solid var(--line);border-radius:12px;
+  padding:14px 16px;color:var(--mist);font-family:'Inter',sans-serif;font-size:.98rem;
+  line-height:1.55;
+}
+.input-card textarea::placeholder{color:var(--muted)}
+.input-card textarea:focus{outline:none;border-color:var(--lotus)}
+.input-actions{display:flex;justify-content:flex-end;margin-top:16px}
+.cta{
+  background:var(--gold);color:var(--ink);border:none;border-radius:10px;
+  padding:12px 28px;font-family:'Inter',sans-serif;font-weight:600;font-size:.92rem;
+  cursor:pointer;transition:filter .2s ease;
+}
+.cta:hover,.cta:focus-visible{filter:brightness(1.08);outline:none}
+.cta.ghost{
+  background:transparent;color:var(--lavender);border:1px solid var(--line);
+  font-weight:500;padding:9px 18px;font-size:.82rem;
+}
+.cta.ghost:hover{border-color:var(--lotus)}
+
+/* ---------- result ---------- */
+.result-zone{padding:26px 0 60px}
+.result-card{
+  background:var(--panel);border:1px solid var(--line);border-radius:18px;
+  padding:32px 34px;max-width:760px;margin:0 auto;display:none;
+}
+.result-card.show{display:block}
+.result-card .eyebrow{
+  font-family:'IBM Plex Mono',monospace;font-size:.68rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:12px;
+}
+.story{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:600;
+  font-size:clamp(1.3rem,3vw,1.65rem);line-height:1.5;color:var(--mist);
+  margin-bottom:22px;
+}
+.story .hl{color:var(--lotus);font-style:normal;font-weight:600}
+.copy-row{display:flex;justify-content:flex-end;margin:-10px 0 22px}
+.copy-row .cta.ghost.copied{border-color:var(--gold);color:var(--gold)}
+
+.ac-title{
+  font-family:'IBM Plex Mono',monospace;font-size:.68rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:12px;
+}
+.ac-list{list-style:none;margin-bottom:26px}
+.ac-list li{
+  border-left:2px solid var(--gold);padding:2px 0 14px 16px;
+  color:var(--mist);font-size:.92rem;line-height:1.55;
+}
+.ac-list li b{color:var(--lavender);font-weight:600}
+.ac-list li:last-child{padding-bottom:2px}
+
+.detected{
+  border-top:1px solid var(--line);padding-top:18px;
+  display:flex;flex-wrap:wrap;gap:22px;
+}
+.detected .field{min-width:140px}
+.detected .k{
+  font-family:'IBM Plex Mono',monospace;font-size:.64rem;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:4px;
+}
+.detected .v{font-size:.88rem;color:var(--lavender)}
+.detected .v .tag{
+  font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);font-style:normal;margin-left:6px;
+}
+
+/* ---------- footer ---------- */
+footer{border-top:1px solid var(--line);padding:34px 0 44px;text-align:center}
+footer .om{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  color:var(--lavender);font-size:1.05rem;margin-bottom:10px;
+}
+footer .meta{
+  font-family:'IBM Plex Mono',monospace;font-size:.72rem;
+  letter-spacing:.16em;color:var(--muted);text-transform:uppercase;
+}
+footer .meta a{color:var(--lotus);text-decoration:none}
+footer .meta a:hover{color:var(--gold)}
+
+@media (max-width:640px){
+  .input-card,.result-card{padding:22px 20px}
+  .detected{gap:16px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">Bodhi<b>Protocol</b></div>
+</header>
+
+<section class="hero wrap">
+  <h1>Every requirement hides <em>a story.</em> Find it.</h1>
+  <p class="sub">Paste a messy stakeholder sentence. Get a proper user story and acceptance criteria — no AI call, just the pattern-matching a business analyst does in their head.</p>
+  <div class="examples" id="examples"></div>
+</section>
+
+<section class="input-zone wrap">
+  <div class="input-card">
+    <textarea id="reqInput" placeholder="Traders need to see live P&amp;L so they can manage risk before market close"></textarea>
+    <div class="input-actions">
+      <button class="cta" id="translateBtn">Translate</button>
+    </div>
+  </div>
+</section>
+
+<section class="result-zone wrap">
+  <div class="result-card" id="resultCard">
+    <div class="eyebrow">User story</div>
+    <div class="story" id="storyText"></div>
+    <div class="copy-row"><button class="cta ghost" id="copyBtn">Copy user story</button></div>
+
+    <div class="ac-title">Acceptance criteria</div>
+    <ul class="ac-list" id="acList"></ul>
+
+    <div class="ac-title">What I detected</div>
+    <div class="detected" id="detectedRow"></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="om">"The single biggest problem in communication is the illusion that it has taken place." — George Bernard Shaw</div>
+    <div class="meta">Built by a business analyst · <a href="https://github.com/BodhiProtocol" target="_blank" rel="noopener">github.com/BodhiProtocol</a></div>
+  </div>
+</footer>
+
+<script>
+/* ============ EXAMPLES ============ */
+const EXAMPLES = [
+  "Traders need to see live P&L so they can manage risk before market close",
+  "Compliance officers need audit trails for every trade so regulators can verify activity during inspections",
+  "The system should let portfolio managers rebalance positions without calling the operations desk",
+  "We need faster trade reporting",
+  "Clients want to track their orders in real time because they keep calling support to ask"
+];
+
+const examplesEl = document.getElementById('examples');
+EXAMPLES.forEach(ex => {
+  const btn = document.createElement('button');
+  btn.className = 'example-btn';
+  btn.textContent = ex.length > 46 ? ex.slice(0, 44) + '…' : ex;
+  btn.title = ex;
+  btn.addEventListener('click', () => {
+    document.getElementById('reqInput').value = ex;
+    translate();
+  });
+  examplesEl.appendChild(btn);
+});
+
+/* ============ PARSER ============ */
+const ROLES = [
+  ['compliance officer', /compliance officers?/i],
+  ['portfolio manager', /portfolio managers?/i],
+  ['risk manager', /risk managers?/i],
+  ['operations analyst', /operations analysts?/i],
+  ['business analyst', /\b(business analysts?|BAs?)\b/i],
+  ['custodian', /custodians?/i],
+  ['auditor', /auditors?/i],
+  ['investor', /investors?/i],
+  ['broker', /brokers?/i],
+  ['trader', /traders?/i],
+  ['client', /clients?/i],
+  ['user', /\busers?\b/i]
+];
+
+const CONNECTOR_RE = /\b(so that|in order to|because|so)\b/i;
+
+const VERB_MARKERS = ['needs to','need to','wants to','want to','would like to',
+  'has to','have to','must be able to','should be able to','must','should','can','could'];
+const NOUN_MARKERS = ['needs','need','wants','want','requires','require'];
+
+const BENEFIT_LOOKUP = [
+  [/p&?l|profit\s*(and|&)\s*loss/i, 'they can manage risk in real time'],
+  [/settlement|settle/i, 'they can avoid failed or delayed trades'],
+  [/trade|trading/i, 'they can avoid settlement errors'],
+  [/audit/i, 'they can respond quickly during inspections'],
+  [/complian(t|ce)/i, 'they can stay within regulatory limits'],
+  [/report(ing)?/i, 'they can meet regulatory deadlines'],
+  [/risk/i, 'they can act before losses grow'],
+  [/price|pricing|quote/i, 'they can make informed decisions quickly'],
+  [/client|customer/i, 'they can maintain trust and service quality']
+];
+
+const EDGE_CASES = [
+  [/settlement|settle/i, {given:'a trade fails to settle on time', when:'the exception is flagged', then:'the system alerts the relevant team before the deadline'}],
+  [/trade|trading/i, {given:'trade data arrives late or incomplete', when:'ROLE reviews it', then:'the system clearly marks it as incomplete rather than showing stale data'}],
+  [/audit/i, {given:'an auditor requests historical records', when:'they search by date or trade ID', then:'the system returns a complete, unaltered trail'}],
+  [/complian(t|ce)/i, {given:'an activity breaches a compliance limit', when:'the breach occurs', then:'the system flags it before it reaches a regulator'}],
+  [/report(ing)?/i, {given:'a report is requested outside business hours', when:'ROLE generates it', then:'the system still produces accurate, up-to-date data'}],
+  [/risk|p&?l/i, {given:'market data is delayed or missing', when:'ROLE views the dashboard', then:'the system clearly indicates the data is stale rather than showing it as current'}]
+];
+
+function lowerFirst(s){
+  if(!s) return s;
+  if(/^[A-Z]&/.test(s)) return s;
+  return s.charAt(0).toLowerCase() + s.slice(1);
+}
+
+function detectRole(text){
+  for(const [label, re] of ROLES){
+    if(re.test(text)) return { label, re };
+  }
+  return null;
+}
+
+function stripLeading(s, phrases){
+  for(const p of phrases){
+    const re = new RegExp('^' + p + '\\s+', 'i');
+    if(re.test(s)) return { rest: s.replace(re, '').trim(), matched: true };
+  }
+  return { rest: s, matched: false };
+}
+
+const SUBJECT_RE = /^(the\s+)?(system|application|product|platform|tool|team|process|desk|department|organization|company|business)\s+/i;
+const PRONOUN_RE = /^(we|they|i|he|she|it)\s+/i;
+
+function extractGoal(main, roleMatch){
+  let s = main.trim();
+  if(roleMatch) s = s.replace(roleMatch, ' ').trim();
+  s = s.replace(/\s+/g, ' ').trim();
+
+  if(SUBJECT_RE.test(s)) s = s.replace(SUBJECT_RE, '').trim();
+  else if(PRONOUN_RE.test(s)) s = s.replace(PRONOUN_RE, '').trim();
+  else s = s.replace(/^(the|a|an)\s+/i, '').trim();
+
+  let hasTo = null;
+  let r = stripLeading(s, VERB_MARKERS);
+  if(r.matched){ s = r.rest; hasTo = true; }
+  else{
+    r = stripLeading(s, NOUN_MARKERS);
+    if(r.matched){ s = r.rest; hasTo = false; }
+  }
+
+  s = s.replace(/^(let|allow)\s+/i, '').trim();
+
+  if(!s) s = 'complete this task';
+  s = lowerFirst(s).replace(/[.?!]+$/, '');
+
+  return { phrase: s, hasTo: hasTo === true };
+}
+
+function extractBenefit(benefitRaw, wholeText){
+  if(benefitRaw){
+    let b = lowerFirst(benefitRaw.trim().replace(/[.?!]+$/, ''));
+    return { text: b, suggested: false };
+  }
+  for(const [re, benefit] of BENEFIT_LOOKUP){
+    if(re.test(wholeText)) return { text: benefit, suggested: true };
+  }
+  return { text: 'they can work more efficiently and reduce errors', suggested: true };
+}
+
+function pickEdgeCase(text, role){
+  for(const [re, ec] of EDGE_CASES){
+    if(re.test(text)){
+      return {
+        given: ec.given,
+        when: ec.when.replace('ROLE', 'the ' + role),
+        then: ec.then
+      };
+    }
+  }
+  return {
+    given: `the ${role} has incomplete or delayed information`,
+    when: 'they attempt to proceed',
+    then: 'the system clearly indicates what is missing rather than failing silently'
+  };
+}
+
+function translateRequirement(raw){
+  const text = raw.trim();
+
+  const roleHit = detectRole(text);
+  const role = roleHit ? roleHit.label : 'user';
+
+  const connMatch = text.match(CONNECTOR_RE);
+  let main = text, benefitRaw = null;
+  if(connMatch){
+    main = text.slice(0, connMatch.index).trim();
+    benefitRaw = text.slice(connMatch.index + connMatch[0].length).trim();
+  }
+  if(!main) main = text;
+
+  const goal = extractGoal(main, roleHit ? roleHit.re : null);
+  const benefit = extractBenefit(benefitRaw, text);
+  const edge = pickEdgeCase(text, role);
+
+  const goalForCondition = goal.phrase;
+
+  const story = {
+    role,
+    goalText: (goal.hasTo ? 'to ' : '') + goal.phrase,
+    benefitText: benefit.text
+  };
+
+  const acList = [
+    `<b>Given</b> the ${role} is logged in, <b>When</b> they attempt to ${goalForCondition}, <b>Then</b> the system completes the action and the result is visible immediately.`,
+    `<b>Given</b> ${edge.given}, <b>When</b> ${edge.when}, <b>Then</b> ${edge.then}.`,
+    `<b>Given</b> the ${role} has appropriate permissions, <b>When</b> they access this feature, <b>Then</b> unauthorized users are blocked and the action is recorded in an audit log.`
+  ];
+
+  return {
+    story,
+    acList,
+    detected: {
+      role: { value: role, suggested: !roleHit },
+      goal: { value: goal.phrase, suggested: false },
+      benefit: { value: benefit.text, suggested: benefit.suggested }
+    }
+  };
+}
+
+/* ============ RENDER ============ */
+const resultCard = document.getElementById('resultCard');
+const storyText = document.getElementById('storyText');
+const acListEl = document.getElementById('acList');
+const detectedRow = document.getElementById('detectedRow');
+const copyBtn = document.getElementById('copyBtn');
+
+function render(result){
+  const { story, acList, detected } = result;
+
+  storyText.innerHTML = `As a <span class="hl">${story.role}</span>, I want <span class="hl">${story.goalText}</span>, so that <span class="hl">${story.benefitText}</span>.`;
+
+  acListEl.innerHTML = acList.map(ac => `<li>${ac}</li>`).join('');
+
+  const rows = [
+    ['role', detected.role],
+    ['goal', detected.goal],
+    ['benefit', detected.benefit]
+  ];
+  detectedRow.innerHTML = rows.map(([label, d]) =>
+    `<div class="field"><div class="k">${label}</div><div class="v">${d.value}${d.suggested ? '<span class="tag">suggested</span>' : ''}</div></div>`
+  ).join('');
+
+  resultCard.classList.add('show');
+  copyBtn.textContent = 'Copy user story';
+  copyBtn.classList.remove('copied');
+}
+
+function translate(){
+  const raw = document.getElementById('reqInput').value;
+  if(!raw.trim()) return;
+  render(translateRequirement(raw));
+}
+
+document.getElementById('translateBtn').addEventListener('click', translate);
+document.getElementById('reqInput').addEventListener('keydown', e => {
+  if(e.key === 'Enter' && (e.metaKey || e.ctrlKey)) translate();
+});
+
+copyBtn.addEventListener('click', () => {
+  const text = storyText.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    copyBtn.textContent = 'Copied!';
+    copyBtn.classList.add('copied');
+  });
+});
+</script>
+</body>
+</html>
