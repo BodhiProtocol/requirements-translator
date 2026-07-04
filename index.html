@@ -294,45 +294,56 @@ function detectRole(text){
   return null;
 }
 
-function stripLeading(s, phrases){
+function findMarker(s, phrases){
+  let best = null;
   for(const p of phrases){
-    const re = new RegExp('^' + p + '\\s+', 'i');
-    if(re.test(s)) return { rest: s.replace(re, '').trim(), matched: true };
+    const m = s.match(new RegExp('\\b' + p + '\\b\\s+', 'i'));
+    if(m && (best === null || m.index < best.index)){
+      best = { index: m.index, len: m[0].length };
+    }
   }
-  return { rest: s, matched: false };
+  return best;
 }
-
-const SUBJECT_RE = /^(the\s+)?(system|application|product|platform|tool|team|process|desk|department|organization|company|business)\s+/i;
-const PRONOUN_RE = /^(we|they|i|he|she|it)\s+/i;
 
 function extractGoal(main, roleMatch){
   let s = main.trim();
   if(roleMatch) s = s.replace(roleMatch, ' ').trim();
   s = s.replace(/\s+/g, ' ').trim();
 
-  if(SUBJECT_RE.test(s)) s = s.replace(SUBJECT_RE, '').trim();
-  else if(PRONOUN_RE.test(s)) s = s.replace(PRONOUN_RE, '').trim();
-  else s = s.replace(/^(the|a|an)\s+/i, '').trim();
+  const verbHit = findMarker(s, VERB_MARKERS);
+  const nounHit = findMarker(s, NOUN_MARKERS);
 
-  let hasTo = null;
-  let r = stripLeading(s, VERB_MARKERS);
-  if(r.matched){ s = r.rest; hasTo = true; }
-  else{
-    r = stripLeading(s, NOUN_MARKERS);
-    if(r.matched){ s = r.rest; hasTo = false; }
+  let hasTo = null, rest;
+  if(verbHit && (!nounHit || verbHit.index <= nounHit.index)){
+    rest = s.slice(verbHit.index + verbHit.len).trim();
+    hasTo = true;
+  } else if(nounHit){
+    rest = s.slice(nounHit.index + nounHit.len).trim();
+    hasTo = false;
+  } else{
+    rest = s.replace(/^(the|a|an)\s+/i, '').trim();
   }
 
-  s = s.replace(/^(let|allow)\s+/i, '').trim();
+  rest = rest.replace(/^(let|allow)\s+/i, '').trim();
 
-  if(!s) s = 'complete this task';
-  s = lowerFirst(s).replace(/[.?!]+$/, '');
+  if(!rest) rest = 'complete this task';
+  rest = lowerFirst(rest).replace(/[.?!]+$/, '');
 
-  return { phrase: s, hasTo: hasTo === true };
+  return { phrase: rest, hasTo: hasTo === true };
 }
 
-function extractBenefit(benefitRaw, wholeText){
+function article(role){
+  if(/^user\b/i.test(role)) return 'a';
+  return /^[aeiou]/i.test(role) ? 'an' : 'a';
+}
+
+function extractBenefit(benefitRaw, wholeText, connectorType){
   if(benefitRaw){
-    let b = lowerFirst(benefitRaw.trim().replace(/[.?!]+$/, ''));
+    let b = benefitRaw.trim().replace(/[.?!]+$/, '');
+    if(connectorType === 'in order to' && !/^(they|we|i|he|she|it)\b/i.test(b)){
+      b = 'they can ' + b;
+    }
+    b = lowerFirst(b);
     return { text: b, suggested: false };
   }
   for(const [re, benefit] of BENEFIT_LOOKUP){
@@ -365,15 +376,16 @@ function translateRequirement(raw){
   const role = roleHit ? roleHit.label : 'user';
 
   const connMatch = text.match(CONNECTOR_RE);
-  let main = text, benefitRaw = null;
+  let main = text, benefitRaw = null, connectorType = null;
   if(connMatch){
     main = text.slice(0, connMatch.index).trim();
     benefitRaw = text.slice(connMatch.index + connMatch[0].length).trim();
+    connectorType = connMatch[0].toLowerCase().replace(/\s+/g, ' ').trim();
   }
   if(!main) main = text;
 
   const goal = extractGoal(main, roleHit ? roleHit.re : null);
-  const benefit = extractBenefit(benefitRaw, text);
+  const benefit = extractBenefit(benefitRaw, text, connectorType);
   const edge = pickEdgeCase(text, role);
 
   const goalForCondition = goal.phrase;
@@ -411,7 +423,7 @@ const copyBtn = document.getElementById('copyBtn');
 function render(result){
   const { story, acList, detected } = result;
 
-  storyText.innerHTML = `As a <span class="hl">${story.role}</span>, I want <span class="hl">${story.goalText}</span>, so that <span class="hl">${story.benefitText}</span>.`;
+  storyText.innerHTML = `As ${article(story.role)} <span class="hl">${story.role}</span>, I want <span class="hl">${story.goalText}</span>, so that <span class="hl">${story.benefitText}</span>.`;
 
   acListEl.innerHTML = acList.map(ac => `<li>${ac}</li>`).join('');
 
