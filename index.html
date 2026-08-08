@@ -269,7 +269,8 @@ const BENEFIT_LOOKUP = [
   [/report(ing)?/i, 'they can meet regulatory deadlines'],
   [/risk/i, 'they can act before losses grow'],
   [/price|pricing|quote/i, 'they can make informed decisions quickly'],
-  [/client|customer/i, 'they can maintain trust and service quality']
+  [/client|customer/i, 'they can maintain trust and service quality'],
+  [/portfolio|rebalance|position/i, 'they can respond to market moves without waiting on another team']
 ];
 
 const EDGE_CASES = [
@@ -278,7 +279,10 @@ const EDGE_CASES = [
   [/audit/i, {given:'an auditor requests historical records', when:'they search by date or trade ID', then:'the system returns a complete, unaltered trail'}],
   [/complian(t|ce)/i, {given:'an activity breaches a compliance limit', when:'the breach occurs', then:'the system flags it before it reaches a regulator'}],
   [/report(ing)?/i, {given:'a report is requested outside business hours', when:'ROLE generates it', then:'the system still produces accurate, up-to-date data'}],
-  [/risk|p&?l/i, {given:'market data is delayed or missing', when:'ROLE views the dashboard', then:'the system clearly indicates the data is stale rather than showing it as current'}]
+  [/risk|p&?l/i, {given:'market data is delayed or missing', when:'ROLE views the dashboard', then:'the system clearly indicates the data is stale rather than showing it as current'}],
+  [/client|customer/i, {given:"a client's order status changes", when:'ROLE checks its progress', then:'the system reflects the change immediately, without them needing to contact support'}],
+  [/price|pricing|quote/i, {given:'a price feed is delayed or stale', when:'ROLE views a quote', then:'the system flags it as stale rather than displaying it as live'}],
+  [/portfolio|rebalance|position/i, {given:'a rebalance instruction would breach a position or risk limit', when:'ROLE submits it', then:'the system blocks the action and explains why, rather than executing it silently'}]
 ];
 
 function lowerFirst(s){
@@ -337,11 +341,22 @@ function article(role){
   return /^[aeiou]/i.test(role) ? 'an' : 'a';
 }
 
+function negateBecauseClause(raw){
+  const m = raw.match(/^(they|we|it|he|she|customers?|clients?|users?|traders?)\s+(.+)$/i);
+  if(!m) return null;
+  const subject = m[1];
+  const rest = m[2].trim();
+  const doesNeed = /^(it|he|she|customer|client|user|trader)$/i.test(subject) ? "doesn't" : "don't";
+  return `${subject} ${doesNeed} need to ${rest}`;
+}
+
 function extractBenefit(benefitRaw, wholeText, connectorType){
   if(benefitRaw){
     let b = benefitRaw.trim().replace(/[.?!]+$/, '');
     if(connectorType === 'in order to' && !/^(they|we|i|he|she|it)\b/i.test(b)){
       b = 'they can ' + b;
+    } else if(connectorType === 'because'){
+      b = negateBecauseClause(b) || b;
     }
     b = lowerFirst(b);
     return { text: b, suggested: false };
